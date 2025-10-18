@@ -25,7 +25,7 @@ epsilon = 1e-8
 # --- Analysis functions ---#
 
 
-#--- Streamlit helper ---#
+# --- Streamlit helper ---#
 def reset_to_defaults() -> None:
     st.session_state.Time = 50.0
     st.session_state.s_start = 10
@@ -38,6 +38,7 @@ def reset_to_defaults() -> None:
     st.session_state.A = 2
     st.session_state.k = 0.1
     st.session_state.disable_adaptive_theta = False
+
 
 def init_example():
     reset_events()
@@ -54,7 +55,20 @@ def init_example():
     disable_adaptive_theta = st.session_state.disable_adaptive_theta
 
     t_eval = np.arange(0.0, T, DT)
-    return T, t_eval, alpha, beta, gamma, delta, s_start, w_start, A, K, k, disable_adaptive_theta
+    return (
+        T,
+        t_eval,
+        alpha,
+        beta,
+        gamma,
+        delta,
+        s_start,
+        w_start,
+        A,
+        K,
+        k,
+        disable_adaptive_theta,
+    )
 
 
 # --- Streamlit page building ---#
@@ -66,7 +80,9 @@ def add_sidebar() -> None:
     )
 
     st.sidebar.slider("k", key="k", value=0.5, min_value=0.0, max_value=1.0, step=0.05)
-    st.sidebar.checkbox("Disable adaptive theta (theta=1.0)", key="disable_adaptive_theta", value=False)
+    st.sidebar.checkbox(
+        "Disable adaptive theta (theta=1.0)", key="disable_adaptive_theta", value=False
+    )
 
 
 def add_example_1_sidebar() -> None:
@@ -120,13 +136,28 @@ def render_example_one() -> None:
     """
     Single chart with adaptive theta showing population dynamics and phase portrait
     """
-    st.markdown("""
+    st.markdown(
+        """
     ### Example 1: LV* with Adaptive θ(s; k, K)
     With adaptive control, θ varies with the sheep population, modulating predation intensity based on prey abundance.
     This allows the system to respond dynamically to changing conditions.
-    """)
-    
-    T, t_eval, alpha, beta, gamma, delta, s_start, w_start, A, K, k, disable_adaptive_theta = init_example()
+    """
+    )
+
+    (
+        T,
+        t_eval,
+        alpha,
+        beta,
+        gamma,
+        delta,
+        s_start,
+        w_start,
+        A,
+        K,
+        k,
+        disable_adaptive_theta,
+    ) = init_example()
 
     with st.spinner("Running simulation..."):
         reset_events()
@@ -159,45 +190,61 @@ def render_example_one() -> None:
             )
 
         # Post-process to show entire time range even if simulation stopped early
-        solution_df = pd.DataFrame(
-            solution.y.T,
-            index=solution.t,
-            columns=["Sheep", "Wolves"],
-        ).reindex(t_eval).fillna(0.0)
-        
+        solution_df = (
+            pd.DataFrame(
+                solution.y.T,
+                index=solution.t,
+                columns=["Sheep", "Wolves"],
+            )
+            .reindex(t_eval)
+            .fillna(0.0)
+        )
+
         # Compute theta values over time for visualization
         if disable_adaptive_theta:
             theta_values = [1.0 for s in solution.y[0]]
         else:
-            theta_values = [(s + epsilon) / ((s + epsilon) + (k * K)) for s in solution.y[0]]
-        theta_df = pd.DataFrame({
-            "Time": np.arange(len(solution.t)),
-            "θ": theta_values
-        }).set_index("Time")
+            theta_values = [
+                (s + epsilon) / ((s + epsilon) + (k * K)) for s in solution.y[0]
+            ]
+        theta_df = pd.DataFrame(
+            {
+                "Time": solution.t,  # Use actual time values, not np.arange(len(solution.t))
+                "θ": theta_values,
+            }
+        ).set_index("Time")
 
     # Time series plot
     st.caption("Figure 1: Population Dynamics with Adaptive Control")
     st.line_chart(solution_df, x_label="Time", y_label="Population Density")
-    
-    st.markdown(f"""
+
+    st.markdown(
+        f"""
     The adaptive control function θ(s; k={k}, K={K}) modulates predation based on sheep abundance. 
     Below we show how θ varies over time in response to the sheep population.
-    """)
-    
+    """
+    )
+
     st.caption("Figure 2: Adaptive Control Signal θ(t)")
-    st.line_chart(theta_df, x_label="Time", y_label="θ (Predation Control)")
-    
+    st.line_chart(
+        theta_df, x_label="Time", y_label="θ (Predation Control)", y_range=[0, 1]
+    )
+
     # Phase portrait
-    st.markdown("""
+    st.markdown(
+        """
     The phase portrait below shows the trajectory in (Sheep, Wolves) space. The Allee thresholds are shown as purple dashed lines.
-    """)
-    
-    phase_df = pd.DataFrame({
-        "t": solution.t,
-        "Sheep": solution.y[0],
-        "Wolves": solution.y[1],
-    })
-    
+    """
+    )
+
+    phase_df = pd.DataFrame(
+        {
+            "t": solution.t,
+            "Sheep": solution.y[0],
+            "Wolves": solution.y[1],
+        }
+    )
+
     phase_chart = (
         alt.Chart(phase_df)
         .mark_line()
@@ -209,17 +256,28 @@ def render_example_one() -> None:
         )
         .properties(width="container")
     )
-    
+
     st.caption("Figure 3: Phase Portrait")
     # Add Allee threshold lines and carrying capacity
-    K_line = alt.Chart(pd.DataFrame({'x': [K]})).mark_rule(color='orange').encode(x='x:Q')
-    allee_s = alt.Chart(pd.DataFrame({'x': [A]})).mark_rule(color='purple', strokeDash=[2, 2]).encode(x='x:Q')
-    allee_w = alt.Chart(pd.DataFrame({'y': [A]})).mark_rule(color='purple', strokeDash=[2, 2]).encode(y='y:Q')
-    
+    K_line = (
+        alt.Chart(pd.DataFrame({"x": [K]})).mark_rule(color="orange").encode(x="x:Q")
+    )
+    allee_s = (
+        alt.Chart(pd.DataFrame({"x": [A]}))
+        .mark_rule(color="purple", strokeDash=[2, 2])
+        .encode(x="x:Q")
+    )
+    allee_w = (
+        alt.Chart(pd.DataFrame({"y": [A]}))
+        .mark_rule(color="purple", strokeDash=[2, 2])
+        .encode(y="y:Q")
+    )
+
     st.altair_chart(phase_chart + K_line + allee_s + allee_w, use_container_width=True)
     st.caption("Orange: carrying capacity K; purple dashed: Allee thresholds A.")
-    
-    st.markdown(r"""
+
+    st.markdown(
+        r"""
     As we can see, the adaptive control allows the system to modulate predation intensity dynamically. 
     When prey is scarce, θ → 0 (low predation), and when prey is abundant, θ → 1 (full predation).
     The sensitivity parameter k controls how quickly this transition occurs.

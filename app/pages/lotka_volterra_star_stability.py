@@ -11,7 +11,8 @@ RTOL = 1e-8
 ATOL = 1e-8
 DENSE_OUTPUT = False
 
-#--- Four presets for analysis ---#
+
+# --- Four presets for analysis ---#
 def set_preset_1() -> tuple[float, float, float, float, float, float]:
     alpha = 1.0
     beta = 0.1
@@ -20,6 +21,7 @@ def set_preset_1() -> tuple[float, float, float, float, float, float]:
     K = 20
     A = 1
     return alpha, beta, gamma, delta, K, A
+
 
 def set_preset_2() -> tuple[float, float, float, float, float, float]:
     alpha = 1.0
@@ -30,6 +32,7 @@ def set_preset_2() -> tuple[float, float, float, float, float, float]:
     A = 1
     return alpha, beta, gamma, delta, K, A
 
+
 def set_preset_3() -> tuple[float, float, float, float, float, float]:
     alpha = 1.0
     beta = 1.0
@@ -38,6 +41,7 @@ def set_preset_3() -> tuple[float, float, float, float, float, float]:
     K = 20
     A = 1
     return alpha, beta, gamma, delta, K, A
+
 
 def set_preset_4() -> tuple[float, float, float, float, float, float]:
     alpha = 0.8
@@ -49,7 +53,7 @@ def set_preset_4() -> tuple[float, float, float, float, float, float]:
     return alpha, beta, gamma, delta, K, A
 
 
-#--- Analysis functions ---#
+# --- Analysis functions ---#
 def compute_time_to_crash(
     alpha: float,
     beta: float,
@@ -80,6 +84,7 @@ def compute_time_to_crash(
     idx = int(below[0])
     return float(t_eval[idx])
 
+
 @st.cache_data(show_spinner=False, max_entries=16)
 def compute_stability_surface(
     alpha: float,
@@ -107,15 +112,16 @@ def compute_stability_surface(
     return S, W, Z
 
 
-
-#--- Streamlit page building ---#
+# --- Streamlit page building ---#
 def render_sidebar() -> None:
     if st.sidebar.button("Clear cache and recompute"):
         st.cache_data.clear()
         st.rerun()
 
+
 def render_intro() -> None:
     st.markdown("## LV* stability analysis")
+
 
 def render_analysis() -> None:
     st.markdown("""
@@ -142,7 +148,9 @@ def render_analysis() -> None:
 
         fig = plt.figure(figsize=(6, 4))
         ax = fig.add_subplot(111, projection="3d")
-        surf = ax.plot_surface(S, W, Z, cmap="viridis", edgecolor="none", antialiased=True)
+        surf = ax.plot_surface(
+            S, W, Z, cmap="viridis", edgecolor="none", antialiased=True
+        )
         ax.set_title(title)
         ax.set_xlabel("Sheep start (s0)")
         ax.set_ylabel("Wolves start (w0)")
@@ -150,12 +158,19 @@ def render_analysis() -> None:
         ax.set_zlim(0, T)
         fig.colorbar(surf, shrink=0.6, aspect=10, pad=0.1)
         st.pyplot(fig, clear_figure=True)
-        st.markdown(fr"**Preset:** $\alpha = {alpha}, \beta = {beta}, \gamma = {gamma}, \delta = {delta}, K = {K}, A = {A}$")
+        st.markdown(
+            rf"**Preset:** $\alpha = {alpha}, \beta = {beta}, \gamma = {gamma}, \delta = {delta}, K = {K}, A = {A}$"
+        )
+
 
 def render_footer() -> None:
     st.divider()
     st.markdown("### Quick Navigation")
-    st.page_link("pages/lv_star_with_theta.py", label="Next: LV* with theta as a programmed variable", icon="➡️")
+    st.page_link(
+        "pages/lv_star_with_theta.py",
+        label="Next: LV* with theta as a programmed variable",
+        icon="➡️",
+    )
     st.page_link("pages/home.py", label="Home", icon="🏠")
 
 
@@ -164,5 +179,6 @@ def main() -> None:
     render_intro()
     render_analysis()
     render_footer()
+
 
 main()

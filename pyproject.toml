@@ -11,3 +11,46 @@ dependencies = [
     "scipy>=1.16.2",
     "streamlit>=1.50.0",
 ]
+
+dev_dependencies = [
+    "ruff>=0.10.0",
+]
+
+# ruff.toml
+target-version = "py311"  # or your Python version
+line-length = 120
+
+[lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "N",      # pep8-naming
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "SIM",    # flake8-simplify
+    "TCH",    # flake8-type-checking
+    "PTH",    # flake8-use-pathlib
+    "RUF",    # Ruff-specific rules
+]
+
+ignore = [
+    "E501",   # Line too long (handled by formatter)
+    "B008",   # Do not perform function calls in argument defaults (common in Streamlit)
+    "B904",   # Within an except clause, raise from err (not always needed)
+    "SIM108", # Use ternary operator (sometimes less readable)
+]
+
+[lint.per-file-ignores]
+"__init__.py" = ["F401"]  # Unused imports in __init__.py are often intentional
+
+[format]
+quote-style = "double"
+indent-style = "space"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.14.1",
+]

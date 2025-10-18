@@ -4,7 +4,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from utils.lv_core import lv_star_with_theta_ode_ivp, allee_sheep_event, allee_wolf_event, allee_terminal_event, reset_events
+from utils.lv_core import (
+    lv_star_with_theta_ode_ivp,
+    allee_sheep_event,
+    allee_wolf_event,
+    allee_terminal_event,
+    reset_events,
+)
 
 # Constant DT: since our solver parameters are hardcoded it makes sense to also use a constant DT
 DT = 0.02
@@ -123,12 +129,12 @@ def render_example_one() -> None:
     T, t_eval, alpha, beta, gamma, delta, s_start, w_start, A, K = init_example()
 
     theta_values = [0.0, 0.2, 0.5, 1.0]
-    
+
     with st.spinner("Running simulations and generating plots..."):
         # Create 2x2 subplot layout
         fig, axes = plt.subplots(2, 2, figsize=(14, 10))
         axes = axes.flatten()  # Flatten to make indexing easier
-        
+
         for idx, theta in enumerate(theta_values):
             reset_events()  # Reset events before each of the four simulations (init_example also does this)
             solution = solve_ivp(
@@ -149,56 +155,88 @@ def render_example_one() -> None:
                 rtol=RTOL,
                 atol=ATOL,
                 dense_output=DENSE_OUTPUT,
-                events=[allee_sheep_event, allee_wolf_event, allee_terminal_event] # events that change system trajectory
+                events=[
+                    allee_sheep_event,
+                    allee_wolf_event,
+                    allee_terminal_event,
+                ],  # events that change system trajectory
             )
 
             # Post-process: match Example 2's handling
             # Reindex to show entire time range even if simulation stopped early
-            solution_df = pd.DataFrame(
-                solution.y.T,
-                index=solution.t,
-                columns=["Sheep", "Wolves"],
-            ).reindex(t_eval).fillna(0.0)
+            solution_df = (
+                pd.DataFrame(
+                    solution.y.T,
+                    index=solution.t,
+                    columns=["Sheep", "Wolves"],
+                )
+                .reindex(t_eval)
+                .fillna(0.0)
+            )
 
             # control x-axis: same time for all plots
             time_axis = np.arange(len(t_eval))
-            
+
             # Get current axis
             ax = axes[idx]
-            
+
             # Plot populations on left y-axis
-            line1 = ax.plot(time_axis, solution_df["Sheep"], label="Sheep", color='blue', linewidth=2)
-            line2 = ax.plot(time_axis, solution_df["Wolves"], label="Wolves", color='orange', linewidth=2)
+            line1 = ax.plot(
+                time_axis,
+                solution_df["Sheep"],
+                label="Sheep",
+                color="blue",
+                linewidth=2,
+            )
+            line2 = ax.plot(
+                time_axis,
+                solution_df["Wolves"],
+                label="Wolves",
+                color="orange",
+                linewidth=2,
+            )
             ax.set_xlabel("Time")
             ax.set_ylabel("Population Density")
             ax.set_title(f"θ = {theta}")
             ax.grid(True, alpha=0.3)
-            
+
             # Add horizontal line for Allee threshold A
-            ax.axhline(y=A, color='purple', linestyle=':', linewidth=1, alpha=0.5, label=f'Allee threshold (A={A})')
-            
+            ax.axhline(
+                y=A,
+                color="purple",
+                linestyle=":",
+                linewidth=1,
+                alpha=0.5,
+                label=f"Allee threshold (A={A})",
+            )
+
             # Create right y-axis for theta
             ax2 = ax.twinx()
             # Plot constant theta line
-            line3 = ax2.plot(time_axis, [theta] * len(time_axis), 
-                            label=f'θ = {theta}', 
-                            color='red', 
-                            linestyle='--', 
-                            linewidth=1.5,
-                            alpha=0.7)
-            ax2.set_ylabel("θ (Predation Control)", color='red')
-            ax2.tick_params(axis='y', labelcolor='red')
+            line3 = ax2.plot(
+                time_axis,
+                [theta] * len(time_axis),
+                label=f"θ = {theta}",
+                color="red",
+                linestyle="--",
+                linewidth=1.5,
+                alpha=0.7,
+            )
+            ax2.set_ylabel("θ (Predation Control)", color="red")
+            ax2.tick_params(axis="y", labelcolor="red")
             ax2.set_ylim(-0.05, 1.05)  # Fixed scale for theta across all subplots
-            
+
             # Combine legends
             lines = line1 + line2 + line3
             labels = [line.get_label() for line in lines]
-            ax.legend(lines, labels, loc='upper right', fontsize=8)
-        
+            ax.legend(lines, labels, loc="upper right", fontsize=8)
+
         plt.tight_layout()
-    
+
     st.pyplot(fig)
-    st.caption("Figure 1: Population dynamics under different constant θ values (see dashed line for value)")
+    st.caption(
+        "Figure 1: Population dynamics under different constant θ values (see dashed line for value)"
+    )
 
     st.markdown(r"""
     As we can see from the charts using the default parameters, the system rapidly reaches the Allee threshold and collapses when θ is set to 1.0, which is behavior identical to
@@ -213,14 +251,17 @@ def render_example_one() -> None:
     As we can see, a modulation of predation intensity can have a stabilizing effect on the system even when it is subject to an Allee threshold. However,
     if were not interested in control, we could achieve this simply through adjusting the $\beta$ parameter alone. In our next example, we will assign
     functional control to the $\theta$ parameter in a manner that distinguishes the parameter as a controlling variable.
-    """
-    )
+    """)
 
 
 def render_footer() -> None:
     st.divider()
     st.markdown("### Quick Navigation")
-    st.page_link("pages/lv_star_with_adaptive_theta.py", label="Next: LV* with adaptive theta", icon="➡️")
+    st.page_link(
+        "pages/lv_star_with_adaptive_theta.py",
+        label="Next: LV* with adaptive theta",
+        icon="➡️",
+    )
     st.page_link("pages/home.py", label="Home", icon="🏠")
 
 

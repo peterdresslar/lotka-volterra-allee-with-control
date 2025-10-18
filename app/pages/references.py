@@ -36,7 +36,9 @@ def render_section(title: str, items: list[dict]) -> None:
 
 def main() -> None:
     st.markdown("## References")
-    st.markdown("These references are selected from a larger collection assembled for a related project. Some references may be more directly relevant in future updates to this project.")
+    st.markdown(
+        "These references are selected from a larger collection assembled for a related project. Some references may be more directly relevant in future updates to this project."
+    )
 
     # Core LV and stability
     render_section(
@@ -302,5 +304,3 @@ def main() -> None:
 
 
 main()
-
-

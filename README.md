@@ -1,0 +1,1 @@
+A standalone app regarding the Lotka-Volterra dynamical system.

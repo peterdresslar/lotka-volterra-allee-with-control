@@ -233,6 +233,7 @@ def render_example_one() -> None:
 def render_footer() -> None:
     st.divider()
     st.markdown("### Quick Navigation")
+    st.page_link("pages/references.py", label="Next: References", icon="➡️")
     st.page_link("pages/home.py", label="Home", icon="🏠")
 
 

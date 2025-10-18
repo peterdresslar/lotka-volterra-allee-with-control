@@ -192,7 +192,7 @@ def render_example_one() -> None:
             
             # Combine legends
             lines = line1 + line2 + line3
-            labels = [l.get_label() for l in lines]
+            labels = [line.get_label() for line in lines]
             ax.legend(lines, labels, loc='upper right', fontsize=8)
         
         plt.tight_layout()
@@ -220,6 +220,7 @@ def render_example_one() -> None:
 def render_footer() -> None:
     st.divider()
     st.markdown("### Quick Navigation")
+    st.page_link("pages/lv_star_with_adaptive_theta.py", label="Next: LV* with adaptive theta", icon="➡️")
     st.page_link("pages/home.py", label="Home", icon="🏠")
 
 

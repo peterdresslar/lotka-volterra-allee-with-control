@@ -3,8 +3,7 @@ import streamlit as st
 
 # --- Streamlit page building ---#
 def render_sidebar() -> None:
-    st.sidebar.header("Hello!")
-
+    st.sidebar.link_button("About Peter Dresslar", "https://peterdresslar-asucss-2026.streamlit.app/")
 
 def render_intro() -> None:
     st.markdown(
@@ -48,10 +47,20 @@ We refer to the primary modified version of Lotka-Volterra as LV* or $LV^*$ in t
     """
     )
 
+def render_note() -> None:
+    st.caption("This Streamlit app is part of a larger project on resilience and stability of ecological systems. Paper coming soon.")
+
+def render_footer() -> None:
+    st.divider()
+    st.markdown("### Quick Navigation")
+    st.page_link("pages/lotka_volterra.py", label="Next: Lotka-Volterra", icon="➡️")
+    st.page_link("pages/home.py", label="Home", icon="🏠")
 
 def main() -> None:
     render_sidebar()
     render_intro()
+    render_note()
+    render_footer()
 
 
 main()

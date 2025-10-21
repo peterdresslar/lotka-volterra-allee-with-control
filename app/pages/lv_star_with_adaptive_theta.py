@@ -226,9 +226,21 @@ def render_example_one() -> None:
     )
 
     st.caption("Figure 2: Adaptive Control Signal θ(t)")
-    st.line_chart(
-        theta_df, x_label="Time", y_label="θ (Predation Control)", y_range=[0, 1]
+    theta_chart = (
+        alt.Chart(theta_df.reset_index())
+        .mark_line()
+        .encode(
+            x=alt.X("Time:Q", title="Time"),
+            y=alt.Y(
+                "θ:Q",
+                title="θ (Predation Control)",
+                scale=alt.Scale(domain=[0, 1]),
+            ),
+            tooltip=["Time:Q", "θ:Q"],
+        )
+        .properties(width="container")
     )
+    st.altair_chart(theta_chart, use_container_width=True)
 
     # Phase portrait
     st.markdown(
